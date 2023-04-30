@@ -7,6 +7,8 @@
 #define ON 255
 #define OFF 0
 #define PIN9 9
+#define x_min 0
+#define x_max 2.5
 
 BH1750 sensor;
 ADXL335 adxl;
@@ -31,11 +33,6 @@ void setup()
         Serial.println("----- Error -----");
         while(1);
     }
-
-    adxl.getAcceleration(&x, &y, &z);
-    Serial.println(x);
-    Serial.println(y);
-    Serial.println(z);
     
     average = 0;
     // initialize data array to some initial reading
@@ -49,15 +46,6 @@ void setup()
 
 void loop()
 {  
-/*
-    do {
-        adxl.getAcceleration(&x, &y, &z);
-    } while (x < 1.65 && y < y_threshhold && z < z_threshhold);
-
-    Serial.println(x);
-    Serial.println(y);
-    Serial.println(z);
-*/
     average -= (float) (unsigned int) *current / DATA_SIZE;
     *current = sensor.readLightLevel();
     average += (float) (unsigned int) *current / DATA_SIZE;
@@ -70,6 +58,9 @@ void loop()
     }
 
     if (++current == data + DATA_SIZE) {
+        do {
+            adxl.getAcceleration(&x, &y, &z);
+        } while (x_min < x && x < x_max);
         current = data;
         average = calc_avg(data, DATA_SIZE);
     }
